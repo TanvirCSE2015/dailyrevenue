@@ -205,7 +205,7 @@
                     </li>
                 </ul>
 
-                <a href="{{ route('home') }}#new-application"
+                <a href="{{ route('frontend.applications.create') }}#new-application"
                    class="btn btn-primary-custom ms-lg-3 mt-2 mt-lg-0">
                     নতুন আবেদন
                 </a>

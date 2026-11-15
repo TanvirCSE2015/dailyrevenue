@@ -31,7 +31,7 @@
 
                 <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center justify-content-lg-start">
 
-                    <a href="#"
+                    <a href="{{ route('frontend.applications.create') }}"
                        class="btn btn-light btn-lg text-success px-4">
                         <i class="bi bi-file-earmark-plus me-1"></i>
                         নতুন আবেদন করুন
