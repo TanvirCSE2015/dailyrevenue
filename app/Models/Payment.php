@@ -17,6 +17,8 @@ class Payment extends Model
         'gateway',
         'merchant_invoice_id',
         'gateway_transaction_id',
+        'transaction_token',
+        'gateway_url',
         'amount',
         'currency',
         'status',

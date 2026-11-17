@@ -15,15 +15,20 @@ Route::get('/', [HomeController::class, 'index'])
 Route::view('/abedoner-niyomaboli', 'frontend.pages.rules')
     ->name('frontend.rules');
 
-Route::get('/new-application', [PlotApplicationController::class, 'create'])
-    ->name('frontend.applications.create');
+Route::prefix('application')->name('frontend.applications.')->group(function () {
+    Route::get('/new', [PlotApplicationController::class, 'create'])
+        ->name('create');
 
-Route::prefix('payment')->name('frontend.payment.')->group(function () {
+    Route::post('/store', [PlotApplicationController::class, 'store'])
+        ->name('store');
+});
+
+Route::prefix('payments')->name('frontend.payment.')->group(function () {
 
     Route::get('/success', [PaymentController::class, 'success'])
         ->name('success');
 
-    Route::get('/failure', [PaymentController::class, 'failure'])
+    Route::get('/fail', [PaymentController::class, 'failure'])
         ->name('failure');
 
     Route::get('/cancel', [PaymentController::class, 'cancel'])

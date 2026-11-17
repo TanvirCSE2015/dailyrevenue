@@ -17,10 +17,22 @@
 
         <div class="application-wrapper">
 
+            @if ($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <strong>আবেদন জমা দেওয়া যায়নি। নিচের সমস্যাগুলো সমাধান করুন:</strong>
+
+                    <ul class="mb-0 mt-2">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <form id="applicationForm"
+                action="{{ route('frontend.applications.store') }}"
                 method="POST"
-                enctype="multipart/form-data"
-                novalidate>
+                enctype="multipart/form-data">
+                @csrf
                 {{-- Applicant Type --}}
                 <div class="application-section">
                     <h5 class="section-heading">আবেদনকারীর ধরন নির্বাচন করুন</h5>
@@ -196,7 +208,7 @@
                     <h5 class="section-heading">আবেদন ফি সংক্রান্ত ঘোষণা</h5>
 
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox"
+                        <input class="form-check-input" type="checkbox" name="fee_agreement"
                             id="feeAgreement" required>
 
                         <label class="form-check-label" for="feeAgreement">
@@ -208,9 +220,9 @@
 
 
                 <div class="text-center">
-                    <button type="button" class="btn btn-primary-custom btn-lg"
-                            disabled>
-                        আবেদন জমা দেওয়ার ব্যবস্থা পরবর্তী ধাপে চালু হবে
+                    <button type="submit" class="btn btn-primary-custom btn-lg">
+                        <i class="bi bi-credit-card me-2"></i>
+                        আবেদন করুন ও ৳১০০ ফি পরিশোধ করুন
                     </button>
                 </div>
             </form>
