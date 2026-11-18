@@ -168,7 +168,7 @@
 
 
 {{-- Statistics Section --}}
-<section class="py-5">
+<!-- <section class="py-5">
     <div class="container">
 
         <div class="text-center mb-4">
@@ -223,11 +223,11 @@
 
         </div>
     </div>
-</section>
+</section> -->
 
 
 {{-- Applicant Search Section --}}
-<section class="pb-5" id="applicant-search">
+<!-- <section class="pb-5" id="applicant-search">
     <div class="container">
 
         <div class="content-card text-center">
@@ -246,6 +246,125 @@
                 <i class="bi bi-search me-1"></i>
                 আবেদন অনুসন্ধান করুন
             </a>
+
+        </div>
+
+    </div>
+</section> -->
+
+
+{{-- Smart Applicant Search Section --}}
+<section class="applicant-search-section py-5" id="applicant-search">
+    <div class="container">
+
+        <div class="applicant-search-card">
+
+            <div class="row align-items-center g-4">
+
+                {{-- Left Information --}}
+                <div class="col-lg-5">
+
+                    <div class="search-icon-wrapper mb-3">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+
+                    <h2 class="search-heading">
+                        আবেদনকারীর তথ্য অনুসন্ধান
+                    </h2>
+
+                    <p class="search-subtitle">
+                        আপনার আবেদনকারী নম্বর, মোবাইল নম্বর অথবা
+                        জাতীয় পরিচয়পত্র নম্বর দিয়ে সহজেই আবেদন
+                        ও লেনদেনের তথ্য খুঁজে নিন।
+                    </p>
+
+                    <div class="search-features">
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            দ্রুত তথ্য অনুসন্ধান
+                        </div>
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            আবেদন ও বরাদ্দের তথ্য
+                        </div>
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            মাসিক ভাড়া ও বকেয়ার হিসাব
+                        </div>
+                    </div>
+
+                </div>
+
+                {{-- Right Search Form --}}
+                <div class="col-lg-7">
+                    
+                    <form action="{{ route('frontend.applicants.search') }}"
+                          method="GET"
+                          id="applicantSearchForm">
+
+                        <label for="applicantSearchInput" class="search-label">
+                            অনুসন্ধানের তথ্য লিখুন
+                        </label>
+
+                        <div class="smart-search-box">
+
+                            <div class="smart-search-icon">
+                                <i class="bi bi-search" id="searchTypeIcon"></i>
+                            </div>
+
+                            <input
+                                type="text"
+                                name="q"
+                                id="applicantSearchInput"
+                                class="smart-search-input"
+                                placeholder="আবেদন নম্বর / মোবাইল / NID নম্বর"
+                                autocomplete="off"
+                                required
+                            >
+
+                            <button type="submit" class="smart-search-button">
+                                <span>অনুসন্ধান</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="search-detection mt-2">
+                            <span id="searchTypeText">
+                                <i class="bi bi-info-circle me-1"></i>
+                                যেকোনো একটি তথ্য লিখে অনুসন্ধান করুন।
+                            </span>
+                        </div>
+
+                        <div class="search-examples mt-3">
+
+                            <span>উদাহরণ:</span>
+
+                            <button type="button"
+                                    class="search-example"
+                                    data-value="APP-202611-001">
+                                APP-202611-001
+                            </button>
+
+                            <button type="button"
+                                    class="search-example"
+                                    data-value="01712345678">
+                                01712345678
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    <div class="search-security-note mt-4">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        আপনার ব্যক্তিগত তথ্য নিরাপদ রাখতে
+                        পরিচয় যাচাইয়ের ব্যবস্থা রাখা হবে।
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -415,6 +534,183 @@
         font-size: 13px;
     }
 
+    /* Applicant Search Section */
+
+    .applicant-search-section {
+        background: #f5f8f7;
+    }
+
+    .applicant-search-card {
+        background: #ffffff;
+        border: 1px solid #e8eeeb;
+        border-radius: 18px;
+        padding: 35px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, .05);
+    }
+
+    .search-icon-wrapper {
+        width: 55px;
+        height: 55px;
+        display: grid;
+        place-items: center;
+        background: #e8f5f1;
+        color: #075e54;
+        border-radius: 13px;
+        font-size: 27px;
+    }
+
+    .search-heading {
+        color: #075e54;
+        font-size: 25px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .search-subtitle {
+        color: #667085;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .search-features {
+        display: grid;
+        gap: 11px;
+        margin-top: 20px;
+        color: #344054;
+        font-size: 14px;
+    }
+
+    .search-features i {
+        color: #16a36a;
+        margin-right: 7px;
+    }
+
+    .search-label {
+        display: block;
+        color: #344054;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .smart-search-box {
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #d0d9d5;
+        border-radius: 11px;
+        padding: 6px;
+        transition: .2s ease;
+    }
+
+    .smart-search-box:focus-within {
+        border-color: #07856f;
+        box-shadow: 0 0 0 4px rgba(7, 133, 111, .10);
+    }
+
+    .smart-search-icon {
+        color: #07856f;
+        font-size: 20px;
+        padding: 0 12px;
+    }
+
+    .smart-search-input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        padding: 12px 5px;
+        font-size: 15px;
+        color: #263238;
+    }
+
+    .smart-search-input::placeholder {
+        color: #98a2b3;
+        font-size: 14px;
+    }
+
+    .smart-search-button {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border: none;
+        border-radius: 8px;
+        background: #075e54;
+        color: #ffffff;
+        padding: 12px 20px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: .2s ease;
+    }
+
+    .smart-search-button:hover {
+        background: #064b44;
+    }
+
+    .search-detection {
+        color: #667085;
+        font-size: 13px;
+    }
+
+    .search-examples {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        color: #667085;
+        font-size: 12px;
+    }
+
+    .search-example {
+        border: 1px solid #dce8e3;
+        background: #f5faf8;
+        color: #075e54;
+        border-radius: 5px;
+        padding: 5px 9px;
+        font-size: 12px;
+    }
+
+    .search-example:hover {
+        background: #e5f3ee;
+    }
+
+    .search-security-note {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #667085;
+        font-size: 13px;
+    }
+
+    .search-security-note i {
+        color: #07856f;
+        font-size: 17px;
+    }
+
+    @media(max-width: 767px) {
+        .applicant-search-card {
+            padding: 22px 17px;
+        }
+
+        .search-heading {
+            font-size: 22px;
+        }
+
+        .smart-search-box {
+            flex-wrap: wrap;
+        }
+
+        .smart-search-input {
+            width: calc(100% - 55px);
+        }
+
+        .smart-search-button {
+            width: 100%;
+            justify-content: center;
+            margin-top: 5px;
+        }
+    }
+
     @media(max-width: 991px) {
         .hero-notice-card {
             margin-top: 10px;
@@ -422,4 +718,68 @@
     }
 
 </style>
+@endpush
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const input = document.getElementById('applicantSearchInput');
+    const typeText = document.getElementById('searchTypeText');
+    const typeIcon = document.getElementById('searchTypeIcon');
+
+    if (!input || !typeText || !typeIcon) return;
+
+    input.addEventListener('input', function () {
+
+        const value = this.value.trim();
+
+        if (!value) {
+            typeText.innerHTML =
+                '<i class="bi bi-info-circle me-1"></i> যেকোনো একটি তথ্য লিখে অনুসন্ধান করুন।';
+            typeIcon.className = 'bi bi-search';
+            return;
+        }
+
+        if (/^APP-/i.test(value)) {
+
+            typeText.innerHTML =
+                '<i class="bi bi-check-circle-fill text-success me-1"></i> আবেদনকারী নম্বর দিয়ে অনুসন্ধান করা হচ্ছে।';
+
+            typeIcon.className = 'bi bi-person-badge';
+
+        } else if (/^01\d{9}$/.test(value)) {
+
+            typeText.innerHTML =
+                '<i class="bi bi-check-circle-fill text-success me-1"></i> মোবাইল নম্বর দিয়ে অনুসন্ধান করা হচ্ছে।';
+
+            typeIcon.className = 'bi bi-phone';
+
+        } else if (/^\d{10}$|^\d{13}$|^\d{17}$/.test(value)) {
+
+            typeText.innerHTML =
+                '<i class="bi bi-check-circle-fill text-success me-1"></i> জাতীয় পরিচয়পত্র নম্বর দিয়ে অনুসন্ধান করা হচ্ছে।';
+
+            typeIcon.className = 'bi bi-person-vcard';
+
+        } else {
+
+            typeText.innerHTML =
+                '<i class="bi bi-info-circle me-1"></i> আবেদন নম্বর, মোবাইল অথবা NID নম্বর লিখুন।';
+
+            typeIcon.className = 'bi bi-search';
+        }
+    });
+
+    document.querySelectorAll('.search-example').forEach(function (button) {
+
+        button.addEventListener('click', function () {
+            input.value = this.dataset.value;
+            input.dispatchEvent(new Event('input'));
+            input.focus();
+        });
+
+    });
+
+});
+</script>
 @endpush

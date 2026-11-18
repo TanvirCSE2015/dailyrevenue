@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Frontend\ApplicantSearchController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\PlotApplicationController;
@@ -23,15 +24,11 @@ Route::prefix('application')->name('frontend.applications.')->group(function () 
         ->name('store');
 });
 
-Route::prefix('payments')->name('frontend.payment.')->group(function () {
+Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
+Route::get('/payments/fail', [PaymentController::class, 'failure'])->name('payments.fail');
+Route::get('/payments/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
 
-    Route::get('/success', [PaymentController::class, 'success'])
-        ->name('success');
+Route::get('/applicant-search', [ApplicantSearchController::class, 'search'])
+    ->name('frontend.applicants.search');
 
-    Route::get('/fail', [PaymentController::class, 'failure'])
-        ->name('failure');
-
-    Route::get('/cancel', [PaymentController::class, 'cancel'])
-        ->name('cancel');
-
-});
+Route::post('/applicant-verify', [ApplicantSearchController::class, 'verify'])->name('frontend.applicants.verify');

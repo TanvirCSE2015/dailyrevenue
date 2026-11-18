@@ -58,11 +58,12 @@ class PaymentController extends Controller
         if ($referenceId === '') {
             abort(400, 'Missing payment reference.');
         }
-
+        Log::info('JanataPay Verification Response', [
+            'payment_id' =>$gateway,
+        ]);
         $payment = Payment::query()
             ->where('merchant_invoice_id', $referenceId)
-            ->where('gateway', 'janata_pay')
-            ->firstOrFail();
+            ->first();
 
         try {
             $this->verifyAndSave($payment, $gateway);
@@ -210,6 +211,7 @@ class PaymentController extends Controller
             $updateData = [
                 'gateway_response' => $response,
                 'verified_at' => now('Asia/Dhaka'),
+                'status' => $gatewayStatus,
                 'remarks' => $confirmed
                     ? 'JanataPay payment successfully verified.'
                     : 'Payment not confirmed. Gateway status: '

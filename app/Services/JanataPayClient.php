@@ -24,6 +24,11 @@ class JanataPayClient
         }
 
         $result = $this->sessionCall('/jbagg/api/transaction/tokenize', $payload);
+        // \Illuminate\Support\Facades\Log::info('JanataPay Tokenize Response', [
+        //     'referenceId' => $referenceId,
+        //     'url' => $result['url'] ?? null,
+        //     'transactionToken_received' => ! empty($result['transactionToken']),
+        // ]);
         if (empty($result['transactionToken']) || empty($result['url'])) {
             throw new GatewayException('JanataPay did not return a payment token and URL.');
         }

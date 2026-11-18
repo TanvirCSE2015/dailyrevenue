@@ -1,29 +1,3 @@
-<!-- @extends('frontend.layouts.app')
-
-@section('title', 'পেমেন্ট | প্লট ব্যবস্থাপনা সিস্টেম')
-
-@section('content')
-<div class="container py-5">
-    <div class="text-center">
-        <div class="text-success mb-3">
-            <i class="bi bi-check-circle-fill" style="font-size: 70px;"></i>
-        </div>
-
-        <h2 class="text-success">পেমেন্ট সফল হয়েছে!</h2>
-
-        <p class="text-muted">
-            আপনার পেমেন্ট গ্রহণ করা হয়েছে।
-            যাচাই সম্পন্ন হলে আবেদনটি নিশ্চিত করা হবে।
-        </p>
-
-        <a href="{{ route('home') }}" class="btn btn-primary mt-3">
-            হোম পেজে ফিরে যান
-        </a>
-    </div>
-</div>
-
-@endsection -->
-
 
 @extends('frontend.layouts.app')
 
@@ -70,42 +44,42 @@
 
             <div class="row g-3">
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">আবেদন নম্বর</small>
                     <div class="fw-bold">
                         {{ $application->application_no }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">আবেদনকারীর নম্বর</small>
                     <div class="fw-bold">
                         {{ $application->applicant->applicant_no }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">আবেদনের তারিখ</small>
                     <div class="fw-bold">
                         {{ $application->applied_at?->format('d-m-Y') ?? $application->applied_at }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">আবেদন ফি</small>
                     <div class="fw-bold">
                         ৳{{ number_format((float) $payment->amount, 2) }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">পেমেন্ট নম্বর</small>
                     <div class="fw-bold">
                         {{ $payment->payment_no }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">পেমেন্ট স্ট্যাটাস</small>
                     <div>
                         <span class="badge bg-success">সফল</span>
@@ -131,49 +105,49 @@
 
             <div class="row g-3">
 
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <small class="text-muted">আবেদনকারীর নাম</small>
                     <div class="fw-bold">
                         {{ $application->applicant->name }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <small class="text-muted">পিতার নাম</small>
                     <div class="fw-bold">
                         {{ $application->applicant->father_name }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <small class="text-muted">মাতার নাম</small>
                     <div class="fw-bold">
                         {{ $application->applicant->mother_name }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <small class="text-muted">মোবাইল নম্বর</small>
                     <div class="fw-bold">
                         {{ $application->applicant->mobile }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <small class="text-muted">NID নম্বর</small>
                     <div class="fw-bold">
                         {{ $application->applicant->nid }}
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <small class="text-muted">বর্তমান ঠিকানা</small>
                     <div class="fw-bold">
                         {{ $application->applicant->present_address }}
                     </div>
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-4">
                     <small class="text-muted">স্থায়ী ঠিকানা</small>
                     <div class="fw-bold">
                         {{ $application->applicant->permanent_address }}
@@ -281,3 +255,27 @@
     }
 </style>
 @endpush
+
+
+
+
+
+<!-- <div class="container py-5">
+    <div class="text-center">
+        <div class="text-success mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size: 70px;"></i>
+        </div>
+
+        <h2 class="text-success">পেমেন্ট সফল হয়েছে!</h2>
+
+        <p class="text-muted">
+            আপনার পেমেন্ট গ্রহণ করা হয়েছে।
+            যাচাই সম্পন্ন হলে আবেদনটি নিশ্চিত করা হবে।
+        </p>
+
+        <a href="{{ route('home') }}" class="btn btn-primary mt-3">
+            হোম পেজে ফিরে যান
+        </a>
+    </div>
+</div> -->
+
