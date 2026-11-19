@@ -42,6 +42,7 @@ return new class extends Migration
                 'bkash',
                 'nagad',
                 'bangla_qr',
+                'janata_pay',
                 'manual',
             ]);
 

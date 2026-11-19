@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Applicant;
 use App\Models\DailyRentLedger;
+use App\Models\Payment;
 use App\Models\PlotAllocation;
 use Illuminate\Http\Request;
 
@@ -77,6 +78,9 @@ class ApplicantSearchController extends Controller
 
         $paymentTotal = 0;
         $dueTotal = 0;
+
+        $approvedApplication = null;
+        $securityDepositPayment = null;
 
         if ($applicant && $isVerified) {
 
@@ -248,6 +252,27 @@ class ApplicantSearchController extends Controller
             $dueTotal = $dueMonths->sum('due_amount');
         }
 
+        if ($applicant && $isVerified) {
+
+            // Get latest approved application.
+            $approvedApplication = \App\Models\PlotApplication::query()
+                ->where('applicant_id', $applicant->id)
+                ->where('status', 'approved')
+                ->latest('id')
+                ->first();
+
+            if ($approvedApplication) {
+
+                // Get latest security deposit payment.
+                $securityDepositPayment = Payment::query()
+                    ->where('application_id', $approvedApplication->id)
+                    ->where('applicant_id', $applicant->id)
+                    ->where('payment_for', 'security_deposit')
+                    ->latest('id')
+                    ->first();
+            }
+        }
+
         return view('frontend.applicants.search', [
             'applicant' => $applicant,
             'isVerified' => $isVerified,
@@ -258,6 +283,8 @@ class ApplicantSearchController extends Controller
 
             'dueMonths' => $dueMonths,
             'dueTotal' => $dueTotal,
+            'approvedApplication'=>$approvedApplication, 
+            'securityDepositPayment' => $securityDepositPayment,
         ]);
     }
 

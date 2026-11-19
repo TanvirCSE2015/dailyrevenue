@@ -37,6 +37,7 @@ return new class extends Migration
                 'rejected',
                 'cancelled',
                 'allocated',
+                'returned',
             ])->default('pending_payment');
 
             $table->text('applicant_note')->nullable();
