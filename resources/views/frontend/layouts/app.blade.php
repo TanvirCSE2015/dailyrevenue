@@ -79,7 +79,7 @@
         }
 
         .hero {
-            background: linear-gradient(120deg, #075e54, #0b8172);
+            background: radial-gradient(900px 300px at 85% -10%, rgba(255, 255, 255, .10), transparent 60%), linear-gradient(135deg, #0a5c36 0%, #07452a 100%);
             color: #fff;
             padding: 85px 0;
             overflow: hidden;

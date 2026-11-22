@@ -19,13 +19,30 @@
                 পেমেন্ট সফল হয়েছে!
             </h2>
 
-            <p class="text-muted mb-2">
-                আপনার আবেদন ফি সফলভাবে গ্রহণ করা হয়েছে।
-            </p>
+            @if($payment->payment_for === 'application_fee')
+                <p class="text-muted mb-2">
+                    আপনার আবেদন ফি সফলভাবে গ্রহণ করা হয়েছে।
+                </p>
 
-            <span class="badge bg-success px-3 py-2">
-                আবেদন জমা হয়েছে
-            </span>
+                <span class="badge bg-success px-3 py-2">
+                    আবেদন জমা হয়েছে
+                </span>
+
+            @elseif($payment->payment_for === 'security_deposit')
+                <p class="text-muted mb-2">
+                    আপনার সিকিউরিটি ডিপোজিট সফলভাবে গ্রহণ করা হয়েছে।
+                </p>
+
+                @if($application->status === 'allocated')
+                    <span class="badge bg-success px-3 py-2">
+                        প্লট বরাদ্দ সম্পন্ন হয়েছে
+                    </span>
+                @else
+                    <span class="badge bg-warning text-dark px-3 py-2">
+                        প্লট বরাদ্দ প্রক্রিয়াধীন
+                    </span>
+                @endif
+            @endif
 
         </div>
     </div>
@@ -66,7 +83,9 @@
                 </div>
 
                 <div class="col-md-4">
-                    <small class="text-muted">আবেদন ফি</small>
+                    <small class="text-muted">
+                        {{ $payment->payment_for === 'security_deposit' ? 'সিকিউরিটি ডিপোজিট' : 'আবেদন ফি' }}
+                    </small>
                     <div class="fw-bold">
                         ৳{{ number_format((float) $payment->amount, 2) }}
                     </div>

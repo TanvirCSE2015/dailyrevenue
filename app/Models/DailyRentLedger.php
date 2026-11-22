@@ -69,7 +69,8 @@ class DailyRentLedger extends Model
     {
         return (float) $this->paymentAllocations()
             ->whereHas('payment', function ($query) {
-                $query->where('status', 'success');
+                $query->where('status', 'success')
+                    ->whereNotNull('verified_at');
             })
             ->sum('amount');
     }

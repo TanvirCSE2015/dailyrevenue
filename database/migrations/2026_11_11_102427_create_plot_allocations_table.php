@@ -53,6 +53,7 @@ return new class extends Migration
             $table->date('allocated_at');
             $table->date('start_date');
             $table->date('end_date')->nullable();
+            $table->date('last_synced_date')->nullable();
 
             $table->enum('status', [
                 'active',

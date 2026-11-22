@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('attendance_date');
 
             $table->enum('attendance_status', [
+                'initiated',
                 'present',
                 'absent',
                 'excused',

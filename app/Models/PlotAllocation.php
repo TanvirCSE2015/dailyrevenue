@@ -18,6 +18,7 @@ class PlotAllocation extends Model
         'allocated_at',
         'start_date',
         'end_date',
+        'last_synced_date',
         'status',
         'remarks',
     ];
@@ -28,6 +29,7 @@ class PlotAllocation extends Model
             'allocated_at' => 'date',
             'start_date' => 'date',
             'end_date' => 'date',
+            'last_synced_date' => 'date',
         ];
     }
 
