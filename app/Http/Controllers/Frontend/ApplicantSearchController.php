@@ -126,6 +126,7 @@ class ApplicantSearchController extends Controller
                     if (
                         ! $payment ||
                         $payment->status !== 'success' ||
+                        ! $payment->verified_at ||
                         $payment->payment_for !== 'daily_rent'
                     ) {
                         continue;

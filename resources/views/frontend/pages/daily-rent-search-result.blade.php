@@ -363,92 +363,107 @@
 
                     {{-- Rent Payment Section --}}
                     @if(!$syncIncomplete && $dueDays > 0)
-
                         <div class="rent-payment-section mt-4">
+                            <h5 class="mb-3">
+                                <i class="bi bi-wallet2 me-2"></i>
+                                বকেয়া দৈনিক ভাড়া পরিশোধ
+                            </h5>
 
-                            <div class="rent-payment-heading">
-                                <div class="rent-payment-icon">
-                                    <i class="bi bi-credit-card"></i>
-                                </div>
+                            <form
+                                action="{{ route('frontend.daily-rent.pay') }}"
+                                method="POST"
+                                id="dailyRentPaymentForm"
+                                data-outstanding-amounts="{{ json_encode(
+                                    $dueLedgers
+                                        ->filter(fn ($ledger) => $ledger->calculated_due_amount > 0)
+                                        ->sortBy('rent_date')
+                                        ->map(fn ($ledger) => (float) $ledger->calculated_due_amount)
+                                        ->values()
+                                ) }}"
+                            >
+                                @csrf
 
-                                <div>
-                                    <h5>বকেয়া ভাড়া পরিশোধ</h5>
-
-                                    <p>
-                                        আপনার বকেয়া ভাড়া জনতা পে (JanataPay)
-                                        এর মাধ্যমে পরিশোধ করুন।
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="rent-payment-summary">
-                                <div>
-                                    <span>মোট বকেয়া দিন</span>
-
-                                    <strong>
-                                        {{ number_format($dueDays) }} দিন
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>সর্বমোট বকেয়া</span>
-
-                                    <strong>
-                                        ৳ {{ number_format($totalDue, 2) }}
-                                    </strong>
-                                </div>
-                            </div>
-
-                            <div class="rent-payment-form">
-
-                                <label for="payment_days">
-                                    কত দিনের ভাড়া পরিশোধ করবেন?
-                                </label>
-
-                                <select
-                                    id="payment_days"
-                                    class="form-select"
-                                    disabled
+                                <input
+                                    type="hidden"
+                                    name="plot_number"
+                                    value="{{ $plotNumber }}"
                                 >
-                                    <option value="">
-                                        পেমেন্ট ব্যবস্থা সংযুক্ত হলে নির্বাচন করতে পারবেন
-                                    </option>
-                                </select>
 
-                                <div class="rent-payment-amount mt-3">
-                                    <span>পরিশোধযোগ্য অর্থ</span>
+                                <div class="mb-3">
+                                    <label for="payment_days" class="form-label">
+                                        কত দিনের বকেয়া ভাড়া পরিশোধ করবেন?
+                                    </label>
 
-                                    <strong>
-                                        পেমেন্ট ব্যবস্থা সংযুক্তির অপেক্ষায়
-                                    </strong>
+                                    <select
+                                        name="days"
+                                        id="payment_days"
+                                        class="form-select"
+                                        required
+                                    >
+                                        <option value="">দিন নির্বাচন করুন</option>
+
+                                        @if($dueDays === 1)
+                                            <option value="1">১ দিন</option>
+                                        @else
+                                            @for($day = 2; $day <= $dueDays; $day++)
+                                                <option value="{{ $day }}">
+                                                    {{ $day }} দিন
+                                                </option>
+                                            @endfor
+                                        @endif
+                                    </select>
+
+                                    <small class="text-muted d-block mt-2">
+                                        সবচেয়ে পুরোনো বকেয়া দিনগুলো স্বয়ংক্রিয়ভাবে নির্বাচন হবে।
+                                        প্রতিটি দিনের সম্পূর্ণ অবশিষ্ট ভাড়া পরিশোধ করতে হবে।
+                                    </small>
                                 </div>
+
+                                <div class="payment-preview mb-3" id="paymentPreview" style="display:none;">
+                                    <div class="d-flex justify-content-between">
+                                        <span>নির্বাচিত দিনের সংখ্যা</span>
+                                        <strong id="previewDays">০ দিন</strong>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>মোট পরিশোধযোগ্য টাকা</span>
+                                        <strong id="previewAmount">৳০.০০</strong>
+                                    </div>
+
+                                    <small class="text-muted d-block mt-2">
+                                        এটি প্রাথমিক হিসাব। চূড়ান্ত টাকা সার্ভার যাচাই করবে।
+                                    </small>
+                                </div>
+
+                                @error('payment')
+                                    <div class="alert alert-danger">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+
+                                @error('days')
+                                    <div class="alert alert-danger">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
 
                                 <button
-                                    type="button"
+                                    type="submit"
                                     class="rent-pay-button"
+                                    id="rentPayButton"
                                     disabled
                                 >
-                                    <i class="bi bi-shield-lock me-2"></i>
+                                    <i class="bi bi-shield-check me-2"></i>
                                     JanataPay দিয়ে ভাড়া পরিশোধ
                                 </button>
-
-                                <small class="rent-payment-help">
-                                    পেমেন্ট অপশনটি পরবর্তী ধাপে PaymentController
-                                    ও JanataPay-এর সঙ্গে সংযুক্ত করা হবে।
-                                </small>
-
-                            </div>
-
+                            </form>
                         </div>
 
                     @elseif($syncIncomplete)
-
-                        <div class="rent-payment-disabled mt-4">
-                            <i class="bi bi-lock-fill me-2"></i>
-
-                            হিসাব সম্পূর্ণ না হওয়ায় আপাতত অনলাইন পেমেন্ট বন্ধ রয়েছে।
+                        <div class="alert alert-warning mt-4">
+                            দৈনিক ভাড়ার হিসাব সম্পূর্ণ হয়নি।
+                            আপাতত পেমেন্ট করা যাচ্ছে না।
                         </div>
-
                     @endif
 
                 </div>
@@ -502,507 +517,621 @@
 
 @push('styles')
 <style>
-.rent-result-section {
-    background: #f5f8f7;
-    min-height: 65vh;
-}
-
-.rent-page-icon {
-    width: 65px;
-    height: 65px;
-    display: grid;
-    place-items: center;
-    margin: auto;
-    border-radius: 16px;
-    background: #e6f3ef;
-    color: #075e54;
-    font-size: 30px;
-}
-
-.rent-page-title {
-    color: #075e54;
-    font-size: 27px;
-    font-weight: 700;
-}
-
-.rent-search-card,
-.rent-result-card,
-.rent-empty-result {
-    background: #fff;
-    border: 1px solid #e8eeeb;
-    border-radius: 14px;
-    box-shadow: 0 7px 25px rgba(0,0,0,.04);
-}
-
-.rent-search-card {
-    max-width: 850px;
-    margin: auto;
-    padding: 15px;
-}
-
-.rent-search-input {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.rent-search-input > i {
-    color: #07856f;
-    font-size: 19px;
-    padding-left: 8px;
-}
-
-.rent-search-input input {
-    flex: 1;
-    min-width: 0;
-    border: none;
-    outline: none;
-    padding: 12px 0;
-}
-
-.rent-search-input button {
-    border: none;
-    background: #075e54;
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-.rent-result-card {
-    max-width: 1100px;
-    margin: auto;
-    overflow: hidden;
-}
-
-.rent-result-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #f0f8f6;
-    border-bottom: 1px solid #e5eeeb;
-    padding: 22px 25px;
-}
-
-.rent-result-header h4 {
-    color: #075e54;
-    font-weight: 700;
-    font-size: 19px;
-}
-
-.rent-found-label {
-    color: #16834a;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.rent-header-icon {
-    width: 43px;
-    height: 43px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: #dcefe8;
-    color: #075e54;
-    font-size: 22px;
-}
-
-.rent-result-body {
-    padding: 25px;
-}
-
-.rent-summary-box {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 15px;
-    background: #f8faf9;
-    border: 1px solid #e5eeeb;
-    border-radius: 10px;
-    padding: 17px;
-    margin-bottom: 25px;
-}
-
-.rent-summary-box span,
-.rent-info-item span {
-    display: block;
-    color: #667085;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-.rent-summary-box strong {
-    color: #075e54;
-    font-size: 18px;
-}
-
-.rent-status-active {
-    color: #16834a !important;
-}
-
-.rent-section-title {
-    color: #075e54;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.rent-info-item {
-    background: #f8faf9;
-    border: 1px solid #edf0ee;
-    border-radius: 8px;
-    padding: 12px 14px;
-    min-height: 70px;
-}
-
-.rent-info-item strong {
-    display: block;
-    color: #263238;
-    font-size: 16px;
-    font-weight: 600;
-    overflow-wrap: anywhere;
-}
-
-.rent-stat-card {
-    height: 100%;
-    min-height: 120px;
-    padding: 18px;
-    background: #f0f8f6;
-    border: 1px solid #dceee6;
-    border-radius: 10px;
-}
-
-.rent-stat-card span,
-.rent-stat-card small {
-    display: block;
-    color: #667085;
-    font-size: 13px;
-}
-
-.rent-stat-card strong {
-    display: block;
-    color: #075e54;
-    font-size: 21px;
-    font-weight: 700;
-    margin: 8px 0 3px;
-    overflow-wrap: anywhere;
-}
-
-.rent-stat-waived {
-    background: #effaf3;
-    border-color: #ccebd7;
-}
-
-.rent-stat-waived strong {
-    color: #16834a;
-}
-
-.rent-stat-due {
-    background: #fff8ed;
-    border-color: #f5dfbd;
-}
-
-.rent-stat-due strong {
-    color: #b54708;
-}
-
-.rent-table-wrapper {
-    border: 1px solid #e8eeeb;
-    border-radius: 10px;
-}
-
-.rent-table {
-    min-width: 1050px;
-}
-
-.rent-table thead th {
-    background: #f0f8f6;
-    color: #075e54;
-    font-size: 16px;
-    font-weight: 700;
-    white-space: nowrap;
-    padding: 10px;
-}
-
-.rent-table tbody td {
-    color: #344054;
-    font-size: 16px;
-    padding: 10px;
-    white-space: nowrap;
-}
-
-.rent-due-amount {
-    color: #b54708 !important;
-    font-weight: 700;
-}
-
-.rent-notice {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 9px;
-}
-
-.rent-notice > i {
-    font-size: 22px;
-    flex-shrink: 0;
-}
-
-.rent-notice strong {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.rent-notice p {
-    font-size: 13px;
-    line-height: 1.7;
-}
-
-.notice-warning {
-    background: #fffaeb;
-    border: 1px solid #fedf89;
-    color: #b54708;
-}
-
-.rent-empty-state {
-    text-align: center;
-    background: #eaf7ef;
-    border: 1px solid #ccebd7;
-    color: #16834a;
-    border-radius: 10px;
-    padding: 25px;
-}
-
-.rent-empty-state i {
-    display: block;
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-
-.rent-empty-state strong {
-    display: block;
-    font-size: 17px;
-    margin-bottom: 5px;
-}
-
-.rent-empty-state p {
-    font-size: 13px;
-}
-
-/* Rent Payment */
-
-.rent-payment-section {
-    padding: 22px;
-    background: #f5faf8;
-    border: 1px solid #dceee6;
-    border-radius: 12px;
-}
-
-.rent-payment-heading {
-    display: flex;
-    align-items: flex-start;
-    gap: 13px;
-}
-
-.rent-payment-icon {
-    width: 43px;
-    height: 43px;
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 10px;
-    background: #dcefe8;
-    color: #075e54;
-    font-size: 22px;
-}
-
-.rent-payment-heading h5 {
-    color: #075e54;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.rent-payment-heading p {
-    color: #667085;
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: 0;
-}
-
-.rent-payment-summary {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    background: #fff;
-    border: 1px solid #e5eeeb;
-    border-radius: 9px;
-    padding: 16px;
-    margin: 20px 0;
-}
-
-.rent-payment-summary span {
-    display: block;
-    color: #667085;
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-.rent-payment-summary strong {
-    color: #075e54;
-    font-size: 18px;
-}
-
-.rent-payment-form label {
-    display: block;
-    color: #344054;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.rent-payment-form .form-select {
-    min-height: 46px;
-    border-color: #d0d5dd;
-}
-
-.rent-payment-amount {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    background: #fff;
-    border: 1px solid #e5eeeb;
-    border-radius: 9px;
-    padding: 15px;
-}
-
-.rent-payment-amount span {
-    color: #667085;
-    font-size: 14px;
-}
-
-.rent-payment-amount strong {
-    color: #075e54;
-    font-size: 17px;
-}
-
-.rent-pay-button {
-    width: 100%;
-    border: none;
-    border-radius: 9px;
-    background: #075e54;
-    color: #fff;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: 15px;
-    margin-top: 18px;
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.rent-payment-help {
-    display: block;
-    color: #667085;
-    font-size: 12px;
-    margin-top: 10px;
-}
-
-.rent-payment-disabled {
-    padding: 14px;
-    border-radius: 9px;
-    background: #fff8ed;
-    border: 1px solid #f5dfbd;
-    color: #b54708;
-    font-size: 13px;
-}
-
-.rent-empty-result {
-    max-width: 650px;
-    margin: auto;
-    text-align: center;
-    padding: 45px 25px;
-}
-
-.rent-empty-icon {
-    width: 75px;
-    height: 75px;
-    display: grid;
-    place-items: center;
-    margin: 0 auto 20px;
-    border-radius: 50%;
-    background: #fff1f0;
-    color: #d92d20;
-    font-size: 34px;
-}
-
-.rent-empty-result h4 {
-    color: #344054;
-    font-weight: 700;
-}
-
-.rent-empty-result p {
-    color: #667085;
-    font-size: 14px;
-    line-height: 1.8;
-    max-width: 500px;
-    margin: 12px auto;
-}
-
-.rent-back-link {
-    color: #075e54;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.rent-back-link:hover {
-    text-decoration: underline;
-}
-
-@media(max-width: 767px) {
-    .rent-page-title {
-        font-size: 22px;
+    .rent-result-section {
+        background: #f5f8f7;
+        min-height: 65vh;
     }
 
-    .rent-result-header,
-    .rent-result-body {
-        padding: 17px;
+    .rent-page-icon {
+        width: 65px;
+        height: 65px;
+        display: grid;
+        place-items: center;
+        margin: auto;
+        border-radius: 16px;
+        background: #e6f3ef;
+        color: #075e54;
+        font-size: 30px;
+    }
+
+    .rent-page-title {
+        color: #075e54;
+        font-size: 27px;
+        font-weight: 700;
+    }
+
+    .rent-search-card,
+    .rent-result-card,
+    .rent-empty-result {
+        background: #fff;
+        border: 1px solid #e8eeeb;
+        border-radius: 14px;
+        box-shadow: 0 7px 25px rgba(0,0,0,.04);
+    }
+
+    .rent-search-card {
+        max-width: 850px;
+        margin: auto;
+        padding: 15px;
     }
 
     .rent-search-input {
-        flex-wrap: wrap;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .rent-search-input > i {
+        color: #07856f;
+        font-size: 19px;
+        padding-left: 8px;
     }
 
     .rent-search-input input {
-        width: calc(100% - 55px);
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        padding: 12px 0;
     }
 
     .rent-search-input button {
-        width: 100%;
+        border: none;
+        background: #075e54;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
     }
 
-    .rent-summary-box,
-    .rent-payment-summary {
-        flex-direction: column;
+    .rent-result-card {
+        max-width: 1100px;
+        margin: auto;
+        overflow: hidden;
     }
 
-    .rent-payment-section {
-        padding: 16px;
+    .rent-result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f0f8f6;
+        border-bottom: 1px solid #e5eeeb;
+        padding: 22px 25px;
     }
 
-    .rent-payment-amount {
-        align-items: flex-start;
-        flex-direction: column;
+    .rent-result-header h4 {
+        color: #075e54;
+        font-weight: 700;
+        font-size: 19px;
+    }
+
+    .rent-found-label {
+        color: #16834a;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .rent-header-icon {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #dcefe8;
+        color: #075e54;
+        font-size: 22px;
+    }
+
+    .rent-result-body {
+        padding: 25px;
+    }
+
+    .rent-summary-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 15px;
+        background: #f8faf9;
+        border: 1px solid #e5eeeb;
+        border-radius: 10px;
+        padding: 17px;
+        margin-bottom: 25px;
+    }
+
+    .rent-summary-box span,
+    .rent-info-item span {
+        display: block;
+        color: #667085;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .rent-summary-box strong {
+        color: #075e54;
+        font-size: 18px;
+    }
+
+    .rent-status-active {
+        color: #16834a !important;
+    }
+
+    .rent-section-title {
+        color: #075e54;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .rent-info-item {
+        background: #f8faf9;
+        border: 1px solid #edf0ee;
+        border-radius: 8px;
+        padding: 12px 14px;
+        min-height: 70px;
+    }
+
+    .rent-info-item strong {
+        display: block;
+        color: #263238;
+        font-size: 16px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
     }
 
     .rent-stat-card {
-        padding: 13px;
+        height: 100%;
+        min-height: 120px;
+        padding: 18px;
+        background: #f0f8f6;
+        border: 1px solid #dceee6;
+        border-radius: 10px;
+    }
+
+    .rent-stat-card span,
+    .rent-stat-card small {
+        display: block;
+        color: #667085;
+        font-size: 13px;
     }
 
     .rent-stat-card strong {
+        display: block;
+        color: #075e54;
+        font-size: 21px;
+        font-weight: 700;
+        margin: 8px 0 3px;
+        overflow-wrap: anywhere;
+    }
+
+    .rent-stat-waived {
+        background: #effaf3;
+        border-color: #ccebd7;
+    }
+
+    .rent-stat-waived strong {
+        color: #16834a;
+    }
+
+    .rent-stat-due {
+        background: #fff8ed;
+        border-color: #f5dfbd;
+    }
+
+    .rent-stat-due strong {
+        color: #b54708;
+    }
+
+    .rent-table-wrapper {
+        border: 1px solid #e8eeeb;
+        border-radius: 10px;
+    }
+
+    .rent-table {
+        min-width: 1050px;
+    }
+
+    .rent-table thead th {
+        background: #f0f8f6;
+        color: #075e54;
+        font-size: 16px;
+        font-weight: 700;
+        white-space: nowrap;
+        padding: 10px;
+    }
+
+    .rent-table tbody td {
+        color: #344054;
+        font-size: 16px;
+        padding: 10px;
+        white-space: nowrap;
+    }
+
+    .rent-due-amount {
+        color: #b54708 !important;
+        font-weight: 700;
+    }
+
+    .rent-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 9px;
+    }
+
+    .rent-notice > i {
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .rent-notice strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .rent-notice p {
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .notice-warning {
+        background: #fffaeb;
+        border: 1px solid #fedf89;
+        color: #b54708;
+    }
+
+    .rent-empty-state {
+        text-align: center;
+        background: #eaf7ef;
+        border: 1px solid #ccebd7;
+        color: #16834a;
+        border-radius: 10px;
+        padding: 25px;
+    }
+
+    .rent-empty-state i {
+        display: block;
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .rent-empty-state strong {
+        display: block;
+        font-size: 17px;
+        margin-bottom: 5px;
+    }
+
+    .rent-empty-state p {
+        font-size: 13px;
+    }
+
+    /* Rent Payment */
+
+    .rent-payment-section {
+        padding: 22px;
+        background: #f5faf8;
+        border: 1px solid #dceee6;
+        border-radius: 12px;
+    }
+
+    .rent-payment-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .rent-payment-icon {
+        width: 43px;
+        height: 43px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #dcefe8;
+        color: #075e54;
+        font-size: 22px;
+    }
+
+    .rent-payment-heading h5 {
+        color: #075e54;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .rent-payment-heading p {
+        color: #667085;
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .rent-payment-summary {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        background: #fff;
+        border: 1px solid #e5eeeb;
+        border-radius: 9px;
+        padding: 16px;
+        margin: 20px 0;
+    }
+
+    .rent-payment-summary span {
+        display: block;
+        color: #667085;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .rent-payment-summary strong {
+        color: #075e54;
         font-size: 18px;
     }
-}
+
+    .rent-payment-form label {
+        display: block;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .rent-payment-form .form-select {
+        min-height: 46px;
+        border-color: #d0d5dd;
+    }
+
+    .rent-payment-amount {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #e5eeeb;
+        border-radius: 9px;
+        padding: 15px;
+    }
+
+    .rent-payment-amount span {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .rent-payment-amount strong {
+        color: #075e54;
+        font-size: 17px;
+    }
+
+    .rent-pay-button {
+        width: 100%;
+        border: none;
+        border-radius: 9px;
+        background: #075e54;
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: 700;
+        font-size: 15px;
+        margin-top: 18px;
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    .rent-payment-help {
+        display: block;
+        color: #667085;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+
+    .rent-payment-disabled {
+        padding: 14px;
+        border-radius: 9px;
+        background: #fff8ed;
+        border: 1px solid #f5dfbd;
+        color: #b54708;
+        font-size: 13px;
+    }
+
+    .rent-empty-result {
+        max-width: 650px;
+        margin: auto;
+        text-align: center;
+        padding: 45px 25px;
+    }
+
+    .rent-empty-icon {
+        width: 75px;
+        height: 75px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: #fff1f0;
+        color: #d92d20;
+        font-size: 34px;
+    }
+
+    .rent-empty-result h4 {
+        color: #344054;
+        font-weight: 700;
+    }
+
+    .rent-empty-result p {
+        color: #667085;
+        font-size: 14px;
+        line-height: 1.8;
+        max-width: 500px;
+        margin: 12px auto;
+    }
+
+    .rent-back-link {
+        color: #075e54;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .rent-back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media(max-width: 767px) {
+        .rent-page-title {
+            font-size: 22px;
+        }
+
+        .rent-result-header,
+        .rent-result-body {
+            padding: 17px;
+        }
+
+        .rent-search-input {
+            flex-wrap: wrap;
+        }
+
+        .rent-search-input input {
+            width: calc(100% - 55px);
+        }
+
+        .rent-search-input button {
+            width: 100%;
+        }
+
+        .rent-summary-box,
+        .rent-payment-summary {
+            flex-direction: column;
+        }
+
+        .rent-payment-section {
+            padding: 16px;
+        }
+
+        .rent-payment-amount {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .rent-stat-card {
+            padding: 13px;
+        }
+
+        .rent-stat-card strong {
+            font-size: 18px;
+        }
+    }
 </style>
+@endpush
+
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const paymentDays = document.getElementById('payment_days');
+    const paymentPreview = document.getElementById('paymentPreview');
+    const previewDays = document.getElementById('previewDays');
+    const previewAmount = document.getElementById('previewAmount');
+    const payButton = document.getElementById('rentPayButton');
+    const paymentForm = document.getElementById('dailyRentPaymentForm');
+
+    // প্রয়োজনীয় HTML Element না থাকলে JavaScript বন্ধ থাকবে।
+    if (
+        !paymentDays ||
+        !paymentPreview ||
+        !previewDays ||
+        !previewAmount ||
+        !payButton ||
+        !paymentForm
+    ) {
+        return;
+    }
+
+    // Controller থেকে পাওয়া প্রতিটি দিনের অবশিষ্ট বকেয়া।
+    // তারিখ অনুযায়ী পুরোনো বকেয়া আগে সাজানো হয়েছে।
+    const outstandingAmounts = JSON.parse(
+        paymentForm.dataset.outstandingAmounts
+    );
+
+    // বাংলা সংখ্যায় টাকা ও দিনের সংখ্যা দেখানো।
+    const formatMoney = new Intl.NumberFormat('bn-BD', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    const formatNumber = new Intl.NumberFormat('bn-BD', {
+        maximumFractionDigits: 0
+    });
+
+    // শুরুতে Preview ও Payment Button বন্ধ থাকবে।
+    paymentPreview.style.display = 'none';
+    payButton.disabled = true;
+
+    // দিনের সংখ্যা পরিবর্তন হলে Preview আপডেট হবে।
+    paymentDays.addEventListener('change', function () {
+
+        const days = parseInt(this.value, 10);
+
+        // ভুল বা অবৈধ নির্বাচন হলে Preview বন্ধ।
+        if (
+            !Number.isInteger(days) ||
+            days < 1 ||
+            days > outstandingAmounts.length
+        ) {
+            paymentPreview.style.display = 'none';
+            payButton.disabled = true;
+            return;
+        }
+
+        // FIFO: সবচেয়ে পুরোনো বকেয়া দিনগুলো আগে নির্বাচন।
+        const selectedAmounts = outstandingAmounts.slice(0, days);
+
+        // প্রতিটি দিনের সম্পূর্ণ অবশিষ্ট টাকা যোগ করা।
+        const totalAmount = selectedAmounts.reduce(
+            function (sum, amount) {
+                return sum + amount;
+            },
+            0
+        );
+
+        // মোট টাকা শূন্য বা অবৈধ হলে পেমেন্ট বন্ধ।
+        if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+            paymentPreview.style.display = 'none';
+            payButton.disabled = true;
+            return;
+        }
+
+        // Preview দেখানো।
+        previewDays.textContent =
+            formatNumber.format(days) + ' দিন';
+
+        previewAmount.textContent =
+            '৳' + formatMoney.format(totalAmount);
+
+        paymentPreview.style.display = 'block';
+        payButton.disabled = false;
+    });
+
+    // Double click বা একাধিকবার Submit প্রতিরোধ।
+    paymentForm.addEventListener('submit', function (event) {
+
+        const days = parseInt(paymentDays.value, 10);
+
+        if (
+            !Number.isInteger(days) ||
+            days < 1 ||
+            days > outstandingAmounts.length
+        ) {
+            event.preventDefault();
+            alert('অনুগ্রহ করে সঠিক দিনের সংখ্যা নির্বাচন করুন।');
+            return;
+        }
+
+        payButton.disabled = true;
+        payButton.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>' +
+            'পেমেন্ট প্রস্তুত হচ্ছে...';
+    });
+
+});
+</script>
 @endpush

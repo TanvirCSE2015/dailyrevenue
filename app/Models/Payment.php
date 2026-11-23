@@ -24,6 +24,10 @@ class Payment extends Model
         'status',
         'paid_at',
         'verified_at',
+        'reconciliation_status',
+        'reconciliation_attempts',
+        'reconciled_at',
+        'reconciliation_error',
         'verified_by',
         'gateway_response',
         'remarks',
@@ -36,6 +40,8 @@ class Payment extends Model
             'paid_at' => 'datetime',
             'verified_at' => 'datetime',
             'gateway_response' => 'array',
+            'reconciliation_attempts' => 'integer',
+            'reconciled_at' => 'datetime',
         ];
     }
 

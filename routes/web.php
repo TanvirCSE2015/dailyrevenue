@@ -38,6 +38,9 @@ Route::prefix('application')->name('frontend.applications.')->group(function () 
 // Daily Rent Search by Plot Number
 Route::get('/daily-rent-search', [DailyRentSearchController::class, 'search'])
     ->name('frontend.daily-rent.search');
+// Daily Rent Payment Initiation
+Route::post('/daily-rent-payment', [DailyRentSearchController::class, 'pay'])
+    ->name('frontend.daily-rent.pay');
 
 // Payment Gateway Callback
 Route::get('/payments/success', [PaymentController::class, 'success'])
