@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PlotApplications\Schemas;
 
 use App\Models\Payment;
+use App\Models\Plot;
 use App\Models\PlotApplication;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -167,8 +169,33 @@ class PlotApplicationForm
                     ->columnSpanFull()
                     ->schema([
 
+                        Select::make('plot_id')
+                            ->label('প্লট পরিবর্তন করুন')
+                            ->placeholder('একটি খালি প্লট নির্বাচন করুন')
+                            ->options(fn () => Plot::query()
+                                ->where('status', 'available')
+                                ->whereDoesntHave('activeAllocation')
+                                ->orderBy('plot_number')
+                                ->get()
+                                ->mapWithKeys(fn (Plot $plot) => [
+                                    $plot->id => $plot->plot_number
+                                        . ' | ' . ($plot->location ?? 'অবস্থান উল্লেখ নেই')
+                                        . ' | ' . ($plot->length ?? 0)
+                                        . ' × ' . ($plot->width ?? 0),
+                                ])
+                                ->toArray()
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->visible(fn ($livewire): bool =>
+                                $livewire instanceof EditRecord
+                                && ! $livewire->getRecord()->allocation()->exists()
+                            )
+                            ->helperText('শুধুমাত্র খালি এবং বর্তমানে বরাদ্দ না থাকা প্লট নির্বাচন করা যাবে।'),
+
                         TextEntry::make('plot.plot_number')
-                            ->label('প্লট নম্বর')
+                            ->label('বর্তমান প্লট নম্বর')
                             ->weight('bold')
                             ->color('primary'),
 
@@ -209,7 +236,6 @@ class PlotApplicationForm
                         TextEntry::make('admin_note')
                             ->label('সর্বশেষ Admin মন্তব্য')
                             ->placeholder('কোনো মন্তব্য নেই'),
-
                     ]),
 
                 // -------------------------------------------------

@@ -296,6 +296,68 @@
                             </div>
                         </div>
 
+                                       @elseif($status === 'pending_payment')
+
+                        {{-- Application Fee Payment --}}
+
+                        <div class="deposit-section">
+
+                            <div class="deposit-heading">
+                                <div class="deposit-icon">
+                                    <i class="bi bi-credit-card"></i>
+                                </div>
+
+                                <div>
+                                    <h5>আবেদন ফি পরিশোধ</h5>
+                                    <p>
+                                        আপনার আবেদনটি এখনো জমা হয়নি।
+                                        আবেদন প্রক্রিয়া সম্পন্ন করতে নির্ধারিত
+                                        আবেদন ফি পরিশোধ করুন।
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="deposit-amount">
+                                <span>নির্ধারিত আবেদন ফি</span>
+                                <strong>
+                                    ৳ {{ number_format((float) $application->application_fee_amount, 2) }}
+                                </strong>
+                            </div>
+
+                            <div class="deposit-payment-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                পেমেন্ট সম্পন্ন করতে জনতা পে (JanataPay)
+                                ব্যবহার করুন।
+                            </div>
+
+                            <form
+                                action="{{ route('frontend.applications.application-fee', $application) }}"
+                                method="POST"
+                            >
+                                @csrf
+
+                                <button type="submit" class="deposit-pay-button">
+                                    <i class="bi bi-credit-card me-2"></i>
+                                    আবেদন ফি পরিশোধ করুন
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </form>
+
+                        </div>
+
+                    @elseif($status === 'under_review')
+
+                        <div class="application-notice notice-info">
+                            <i class="bi bi-hourglass-split"></i>
+                            <div>
+                                <strong>আবেদন প্রক্রিয়াধীন</strong>
+                                <p class="mb-0">
+                                    আপনার আবেদনটি বর্তমানে পর্যালোচনাধীন রয়েছে।
+                                    পরবর্তী সিদ্ধান্তের জন্য অপেক্ষা করুন।
+                                </p>
+                            </div>
+                        </div>
+
                     @else
 
                         <div class="application-notice notice-info">
@@ -303,8 +365,9 @@
                             <div>
                                 <strong>আবেদন প্রক্রিয়াধীন</strong>
                                 <p class="mb-0">
-                                    আবেদন অনুমোদিত হলে সিকিউরিটি ডিপোজিট
-                                    পরিশোধের অপশন এখানে প্রদর্শিত হবে।
+                                    আপনার আবেদনের পরবর্তী কার্যক্রম
+                                    চলমান রয়েছে। বিস্তারিত জানতে অফিসে
+                                    যোগাযোগ করুন।
                                 </p>
                             </div>
                         </div>

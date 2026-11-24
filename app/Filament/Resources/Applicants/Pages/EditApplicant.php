@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Applicants\Pages;
 
 use App\Filament\Resources\Applicants\ApplicantResource;
+use App\Filament\Resources\Applicants\Widgets\ApplicantFinancialSummary;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;

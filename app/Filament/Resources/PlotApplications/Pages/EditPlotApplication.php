@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\PlotApplications\Pages;
 
 use App\Filament\Resources\PlotApplications\PlotApplicationResource;
+use App\Models\Plot;
+use App\Models\PlotAllocation;
+use App\Models\PlotApplication;
 use App\Services\PlotApplicationReviewService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -11,6 +14,9 @@ use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class EditPlotApplication extends EditRecord
 {
@@ -25,6 +31,76 @@ class EditPlotApplication extends EditRecord
         ];
     }
 
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        return DB::transaction(function () use ($record, $data) {
+
+            $application = PlotApplication::query()
+                ->whereKey($record->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $requestedPlotId = $data['plot_id'] ?? null;
+
+            unset($data['plot_id']);
+
+            // Allocation তৈরি হয়ে থাকলে Plot পরিবর্তন নিষিদ্ধ
+            if ($application->allocation()->exists()) {
+
+                if (
+                    filled($requestedPlotId)
+                    && (int) $requestedPlotId !== (int) $application->plot_id
+                ) {
+                    throw ValidationException::withMessages([
+                        'plot_id' => 'এই আবেদনের বিপরীতে ইতোমধ্যে প্লট বরাদ্দ হয়েছে। তাই প্লট পরিবর্তন করা যাবে না।',
+                    ]);
+                }
+
+            } elseif (
+                filled($requestedPlotId)
+                && (int) $requestedPlotId !== (int) $application->plot_id
+            ) {
+
+                $plot = Plot::query()
+                    ->whereKey($requestedPlotId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $plot) {
+                    throw ValidationException::withMessages([
+                        'plot_id' => 'নির্বাচিত প্লটটি পাওয়া যায়নি।',
+                    ]);
+                }
+
+                if ($plot->status !== 'available') {
+                    throw ValidationException::withMessages([
+                        'plot_id' => 'নির্বাচিত প্লটটি আর খালি নেই। অন্য একটি প্লট নির্বাচন করুন।',
+                    ]);
+                }
+
+                $hasActiveAllocation = PlotAllocation::query()
+                    ->where('plot_id', $plot->id)
+                    ->where('status', 'active')
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($hasActiveAllocation) {
+                    throw ValidationException::withMessages([
+                        'plot_id' => 'এই প্লটটি ইতোমধ্যে অন্য একজন আবেদনকারীকে বরাদ্দ করা হয়েছে।',
+                    ]);
+                }
+
+                $data['plot_id'] = $plot->id;
+            }
+
+            $application->fill($data);
+            $application->save();
+
+            return $application;
+
+        }, 5);
+    }
+
 
     /**
      * Actions displayed below the application details.
@@ -32,6 +108,12 @@ class EditPlotApplication extends EditRecord
     protected function getFormActions(): array
     {
         return [
+            Action::make('save')
+                ->label('পরিবর্তন সংরক্ষণ করুন')
+                ->icon('heroicon-o-check')
+                ->color('primary')
+                ->size('lg')
+                ->action(fn () => $this->save()),
             Action::make('underReview')
                 ->label('যাচাই শুরু করুন')
                 ->icon('heroicon-o-magnifying-glass')

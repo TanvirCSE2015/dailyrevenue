@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Applicants\Schemas;
 
+use App\Models\Applicant;
+use App\Services\ApplicantFinancialSummaryService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
@@ -19,7 +22,7 @@ class ApplicantForm
                 Wizard::make([
                     // ধাপ ১: ব্যক্তিগত তথ্য
                     Step::make('ব্যক্তিগত তথ্য')
-                        ->description('ব্যক্তিগত ও পরিচয় সংক্রান্ত তথ্য')
+                        // ->description('ব্যক্তিগত ও পরিচয় সংক্রান্ত তথ্য')
                         ->icon('heroicon-o-user')
                         ->schema([
                             TextInput::make('applicant_no')
@@ -27,8 +30,7 @@ class ApplicantForm
                                 ->placeholder('স্বয়ংক্রিয়ভাবে তৈরি হবে')
                                 ->disabled()
                                 ->dehydrated(false)
-                                ->visibleOn('edit')
-                                ->columnSpanFull(),
+                                ->visibleOn(['edit', 'view']),
 
                             TextInput::make('name')
                                 ->label('আবেদনকারীর নাম')
@@ -75,11 +77,11 @@ class ApplicantForm
                                 ->default(true)
                                 ->inline(false),
                         ])
-                        ->columns(3),
+                        ->columns(4),
 
                     // ধাপ ২: ঠিকানা
                     Step::make('ঠিকানা')
-                        ->description('বর্তমান ও স্থায়ী ঠিকানা')
+                        // ->description('বর্তমান ও স্থায়ী ঠিকানা')
                         ->icon('heroicon-o-map-pin')
                         ->schema([
                             Textarea::make('present_address')
@@ -98,7 +100,7 @@ class ApplicantForm
 
                     // ধাপ ৩: ছবি ও ডকুমেন্ট
                     Step::make('ছবি ও ডকুমেন্ট')
-                        ->description('ছবি এবং NID-এর কপি সংযুক্ত করুন')
+                        // ->description('ছবি এবং NID-এর কপি সংযুক্ত করুন')
                         ->icon('heroicon-o-identification')
                         ->schema([
                             FileUpload::make('image')
@@ -152,6 +154,22 @@ class ApplicantForm
                             
                         ])
                         ->columns(3),
+                          // ধাপ ৪: আর্থিক সারসংক্ষেপ
+                        Step::make('আর্থিক সারসংক্ষেপ')
+                            // ->description('আবেদনকারীর সব ধরনের আর্থিক হিসাব')
+                            ->icon('heroicon-o-banknotes')
+                            ->visibleOn(['edit','view'])
+                            ->schema([
+                                View::make(
+                                    'backend.applicants.financial-summary'
+                                )
+                                    ->viewData(fn (?Applicant $record): array => [
+                                        'summary' => $record
+                                            ? app(ApplicantFinancialSummaryService::class)
+                                                ->calculate($record)
+                                            : null,
+                                    ]),
+                            ]),
                 ])
                     ->columnSpanFull()
                     ->skippable()

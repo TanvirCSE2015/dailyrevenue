@@ -31,6 +31,10 @@ Route::prefix('application')->name('frontend.applications.')->group(function () 
     // Search application by application number
     Route::get('/search', [ApplicationSearchController::class, 'search'])
         ->name('search');
+    //  Application fee pay route
+    Route::post('/{application}/application-fee', [ApplicationSearchController::class, 'applicationFee'])
+    ->name('application-fee');
+    //  Security pay route
     Route::post('/{application}/security-deposit', [ApplicationSearchController::class, 'securityDeposit'])
         ->name('security-deposit');
 });

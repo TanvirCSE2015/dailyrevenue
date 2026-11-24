@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -69,6 +70,23 @@ class Applicant extends Model
                 $applicant->created_by = auth()->id();
             }
         });
+    }
+
+    public function dailyRentLedgers(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            DailyRentLedger::class,
+            PlotAllocation::class,
+            'applicant_id',
+            'allocation_id',
+            'id',
+            'id'
+        );
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
 

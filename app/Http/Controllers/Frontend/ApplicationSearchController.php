@@ -62,6 +62,181 @@ class ApplicationSearchController extends Controller
             )
         );
     }
+    /**
+     * Initiate application fee re-payment through JanataPay.
+     */
+    public function applicationFee(
+        Request $request,
+        PlotApplication $application,
+        JanataPayClient $janataPay
+    ) {
+        if ($application->status !== 'pending_payment') {
+            return back()->withErrors([
+                'payment' => 'শুধুমাত্র আবেদন ফি পরিশোধ অপেক্ষমাণ আবেদনের জন্য পেমেন্ট করা যাবে।',
+            ]);
+        }
+
+        try {
+            $result = DB::transaction(function () use ($application, $janataPay) {
+
+                /*
+                * Lock application to prevent concurrent payment initiation.
+                */
+                $lockedApplication = PlotApplication::query()
+                    ->whereKey($application->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($lockedApplication->status !== 'pending_payment') {
+                    throw new \RuntimeException(
+                        'আবেদনটি বর্তমানে আবেদন ফি পরিশোধের উপযুক্ত অবস্থায় নেই।'
+                    );
+                }
+
+                /*
+                * Check whether application fee is already paid.
+                */
+                $feePaid = Payment::query()
+                    ->where('application_id', $lockedApplication->id)
+                    ->where('payment_for', 'application_fee')
+                    ->where('status', 'success')
+                    ->whereNotNull('verified_at')
+                    ->exists();
+
+                if ($feePaid) {
+                    throw new \RuntimeException(
+                        'এই আবেদনের আবেদন ফি ইতোমধ্যে পরিশোধ করা হয়েছে।'
+                    );
+                }
+
+                /*
+                * Find the latest active application fee payment.
+                */
+                $existingPayment = Payment::query()
+                    ->where('application_id', $lockedApplication->id)
+                    ->where('payment_for', 'application_fee')
+                    ->where('gateway', 'janata_pay')
+                    ->whereIn('status', ['initiated', 'pending'])
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                /*
+                * Reuse an existing payment if gateway URL exists.
+                */
+                if ($existingPayment && filled($existingPayment->gateway_url)) {
+                    return [
+                        'gateway_url' => $existingPayment->gateway_url,
+                        'error' => null,
+                    ];
+                }
+
+                /*
+                * Do not create another payment while an existing
+                * initiated/pending payment has no gateway URL.
+                */
+                if ($existingPayment) {
+                    throw new \RuntimeException(
+                        'আপনার আগের পেমেন্টটি এখনো প্রক্রিয়াধীন। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন অথবা অফিসে যোগাযোগ করুন।'
+                    );
+                }
+
+                /*
+                * Create a new application fee payment.
+                */
+                $paymentNo = 'PAY-'
+                    . now('Asia/Dhaka')->format('Ymd')
+                    . '-'
+                    . Str::upper(Str::random(8));
+
+                $invoiceId = 'PLOT-'
+                    . now('Asia/Dhaka')->format('Ymd')
+                    . '-'
+                    . Str::upper(Str::random(8));
+
+                $payment = Payment::create([
+                    'payment_no' => $paymentNo,
+                    'applicant_id' => $lockedApplication->applicant_id,
+                    'application_id' => $lockedApplication->id,
+                    'payment_for' => 'application_fee',
+                    'gateway' => 'janata_pay',
+                    'merchant_invoice_id' => $invoiceId,
+                    'amount' => $lockedApplication->application_fee_amount,
+                    'currency' => 'BDT',
+                    'status' => 'initiated',
+                    'remarks' => 'Application fee re-payment.',
+                ]);
+
+                /*
+                * Initiate JanataPay.
+                */
+                try {
+                    $gatewayResponse = $janataPay->tokenize(
+                        Money::cents($payment->amount),
+                        'Application Fee - ' . $lockedApplication->application_no,
+                        $payment->merchant_invoice_id
+                    );
+
+                    $transactionToken = $gatewayResponse['transactionToken'] ?? null;
+                    $gatewayUrl = $gatewayResponse['url'] ?? null;
+
+                    if (blank($transactionToken) || blank($gatewayUrl)) {
+                        throw new \RuntimeException(
+                            'JanataPay did not return a valid payment token or URL.'
+                        );
+                    }
+
+                    $payment->update([
+                        'transaction_token' => $transactionToken,
+                        'gateway_url' => $gatewayUrl,
+                        'status' => 'pending',
+                        'gateway_response' => $gatewayResponse,
+                    ]);
+
+                    return [
+                        'gateway_url' => $gatewayUrl,
+                        'error' => null,
+                    ];
+
+                } catch (Throwable $gatewayException) {
+
+                    /*
+                    * Do not guess the final Gateway payment status.
+                    * Keep the payment record for investigation.
+                    */
+                    $payment->update([
+                        'remarks' => 'Application fee payment initiation encountered an error. Gateway result requires verification.',
+                        'gateway_response' => [
+                            'error' => $gatewayException->getMessage(),
+                        ],
+                    ]);
+
+                    throw $gatewayException;
+                }
+
+            }, 5);
+
+            if ($result['error']) {
+                throw new \RuntimeException($result['error']);
+            }
+
+            return redirect()->away($result['gateway_url']);
+
+        } catch (Throwable $exception) {
+
+            report($exception);
+
+            return redirect()
+                ->route('frontend.applications.search', [
+                    'application_no' => $application->application_no,
+                ])
+                ->withErrors([
+                    'payment' => $exception instanceof \RuntimeException
+                        ? $exception->getMessage()
+                        : 'আবেদন ফি পেমেন্ট চালু করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+                ]);
+        }
+    }
 
     /**
      * Initiate security deposit payment through JanataPay.
