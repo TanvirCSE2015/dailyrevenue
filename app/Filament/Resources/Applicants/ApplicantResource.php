@@ -12,6 +12,7 @@ use App\Filament\Resources\Applicants\RelationManagers\OutstandingRentRelationMa
 use App\Filament\Resources\Applicants\RelationManagers\PaidRentRelationManager;
 use App\Filament\Resources\Applicants\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\Applicants\RelationManagers\PlotAllocationsRelationManager;
+use App\Filament\Resources\Applicants\Schemas\ApplicantInfolist;
 use App\Models\Applicant;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -45,10 +46,10 @@ class ApplicantResource extends Resource
         return ApplicantForm::configure($schema);
     }
 
-    // public static function infolist(Schema $schema): Schema
-    // {
-    //     return ApplicantInfolist::configure($schema);
-    // }
+    public static function infolist(Schema $schema): Schema
+    {
+        return ApplicantInfolist::configure($schema);
+    }
 
     public static function table(Table $table): Table
     {
